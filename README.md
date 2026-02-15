@@ -59,7 +59,7 @@ git init
 git add .
 git commit -m "Add reproducible LoveBytes 8K HDR slideshow pipeline"
 git branch -M main
-git remote add origin https://github.com/<you>/highqualityphotovideoconcat.git
+git remote add origin https://github.com/<you>/HQP2VC.git
 git push -u origin main
 ```
 
