@@ -1,0 +1,49 @@
+# Project Context
+
+## Original Objective
+Build one final slideshow video from all photos in:
+
+`C:\Users\tarus\Downloads\LoveBytesPhotos`
+
+## Final Spec (locked)
+
+- **8K 3:2 HDR** output
+- **8192x5462** frame size (even height for Main10 4:2:0 safety)
+- **1 sec per image**, hard cuts only
+- **No crop** (fit + pad only)
+- **JPG + RAW pairs kept adjacent**, with JPG first
+- **HEIC included** by converting to JPEG
+- **High bitrate** encode intent (used 300 Mbps CBR-HQ NVENC settings)
+
+## Key Decisions
+
+1. **RAW decoding moved to `rawpy`**
+   - FFmpeg often selected embedded low-res/monochrome previews from RAW files.
+2. **HEIC decoding moved to `pillow-heif`**
+   - Avoided incorrect auxiliary/depth stream extraction that produced tiny/gray frames.
+3. **Pair-lock orientation**
+   - RAW render orientation was normalized to match paired JPG portrait/landscape orientation.
+4. **MKV-first encoding**
+   - After an invalid MP4 (`moov atom not found`), switched to encode MKV then remux to MP4.
+
+## Dataset / Pipeline Outcomes
+
+- ZIP archives extracted: 32
+- ZIPs removed post-extraction: 32
+- Total extracted files: 3141
+- RAW conversion (`rawpy`) run summary:
+  - total=1386, ok=1335, fail=0, skip=51
+- HEIC conversion (`pillow-heif`) run summary:
+  - total=163, ok=163, fail=0
+- Final built sequence size: 3090 image steps
+
+## Important Paths
+
+- Source root: `C:\Users\tarus\Downloads\LoveBytesPhotos`
+- RAW JPEG outputs: `C:\Users\tarus\Downloads\LoveBytesPhotos\_raw_jpeg_pipeline_full`
+- RAW log: `C:\Users\tarus\Downloads\LoveBytesPhotos\_raw_jpeg_pipeline_full\rawpy_render_log_bright_resume.csv`
+- HEIC JPEG outputs: `C:\Users\tarus\Downloads\LoveBytesPhotos\_heic_jpeg_pipeline_full`
+- HEIC log: `C:\Users\tarus\Downloads\LoveBytesPhotos\_heic_jpeg_pipeline_full\heic_render_log_pillow.csv`
+- Final concat list: `C:\Users\tarus\Downloads\LoveBytesPhotos\_build_final_3x2_dci\concat.txt`
+- Encode target MKV: `C:\Users\tarus\Downloads\LoveBytesPhotos\LoveBytes_full_8k_3x2_ALL_1s_HDR_MAXBITRATE.mkv`
+- Remux target MP4: `C:\Users\tarus\Downloads\LoveBytesPhotos\LoveBytes_full_8k_3x2_ALL_1s_HDR_MAXBITRATE.mp4`
