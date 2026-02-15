@@ -85,7 +85,23 @@ ffmpeg -y -i input.mkv -c copy -movflags +faststart output.mp4
 
 ---
 
-## 7) Long MKV encode crashes mid-run
+## 7) RAW appears rotated opposite to JPEG
+
+### Symptom
+- Same capture shows JPEG and RAW in opposite direction.
+
+### Cause
+- RAW decoder orientation metadata/path differs from JPEG orientation handling.
+
+### Fix
+- Treat JPEG as canonical orientation for matched pair.
+- Normalize both frames with EXIF transpose first.
+- Compute/apply RAW correction to match JPEG orientation class.
+- Enforce final policy: horizontals right-side-up, verticals consistently left-turned.
+
+---
+
+## 8) Long MKV encode crashes mid-run
 
 ### Symptom
 - FFmpeg exits non-zero after long progress; partial MKV exists.

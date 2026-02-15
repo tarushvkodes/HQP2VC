@@ -12,6 +12,8 @@ This repo (**HQP2VC**, short for **High Quality Photo Video Concat**) documents 
 - Rule: keep JPG and RAW counterparts adjacent (`JPG -> RAW`)
 - Rule: include HEIC content via conversion to JPEG
 - Rule: no crop (rotate-to-fit heuristic + scale + pad)
+- Rule: sequence by EXIF capture time at the **event level** (never grouped by file type)
+- Rule: orientation consistency per pair: RAW is matched to JPEG orientation; vertical outputs are normalized to a consistent left-turn policy
 
 ## Why this exists
 
@@ -30,10 +32,11 @@ Raw command history got long and iterative. This repo turns everything into a re
 2. Extract all Amazon ZIPs
 3. Convert RAW -> JPEG (`rawpy`)
 4. Convert HEIC -> JPEG (`pillow-heif`)
-5. Build paired sequence + concat list
-6. Encode MKV (crash-safe)
-7. Remux MKV -> MP4
-8. Validate output metadata
+5. Build EXIF-chronological event sequence with strict `JPEG->RAW` adjacency and orientation normalization
+6. Build concat list
+7. Encode MKV (crash-safe)
+8. Remux MKV -> MP4
+9. Validate output metadata
 
 See `docs/COMMAND_LOG.md` for exact commands.
 

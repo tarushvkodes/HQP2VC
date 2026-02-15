@@ -43,6 +43,18 @@ python .\04_build_sequence.py `
   --out-seq "C:\Users\tarus\Downloads\LoveBytesPhotos\_build_final_3x2_dci\sequence.json"
 ```
 
+## 4b) Rebuild strict EXIF chronology + pair adjacency + orientation normalization (recommended)
+
+```powershell
+python .\09_build_chrono_pair_sequence.py `
+  --root "C:\Users\tarus\Downloads\LoveBytesPhotos" `
+  --raw-jpeg-root "C:\Users\tarus\Downloads\LoveBytesPhotos\_raw_jpeg_pipeline_full" `
+  --heic-jpeg-root "C:\Users\tarus\Downloads\LoveBytesPhotos\_heic_jpeg_pipeline_full" `
+  --normalized-out "C:\Users\tarus\Downloads\LoveBytesPhotos\_normalized_chrono_frames" `
+  --sequence-out "C:\Users\tarus\Downloads\LoveBytesPhotos\_build_chrono_pair\sequence.json" `
+  --audit-out "C:\Users\tarus\Downloads\LoveBytesPhotos\_build_chrono_pair\audit.json"
+```
+
 ## 5) Build concat.txt from sequence
 
 ```powershell

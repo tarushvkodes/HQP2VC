@@ -48,6 +48,25 @@ Build one final slideshow video from all photos in:
 - Encode target MKV: `C:\Users\tarus\Downloads\LoveBytesPhotos\LoveBytes_full_8k_3x2_ALL_1s_HDR_MAXBITRATE.mkv`
 - Remux target MP4: `C:\Users\tarus\Downloads\LoveBytesPhotos\LoveBytes_full_8k_3x2_ALL_1s_HDR_MAXBITRATE.mp4`
 
+## Chronological Pairing Rebuild (2026-02-15)
+
+User reported sequence integrity issues in prior output:
+- non-chronological ordering across mixed formats
+- inconsistent JPEG/RAW adjacency
+- RAW/JPEG pair orientation mismatches
+- upside-down horizontals / inconsistent vertical direction
+
+Rebuild policy locked:
+1. Global sequence sorted by EXIF capture datetime.
+2. Pairing handled at event level (not by extension batches).
+3. For each matched event, output order is always `JPEG -> RAW`.
+4. RAW orientation is normalized to JPEG orientation for the same event.
+5. Vertical images are normalized to a single direction policy (left-turn consistency).
+
+Implementation in progress script:
+- `scripts/09_build_chrono_pair_sequence.py`
+- Reuses existing rendered assets (`_raw_jpeg_pipeline_full`, `_heic_jpeg_pipeline_full`) to avoid full reconversion.
+
 ## Additional Recovery Work (2026-02-15)
 
 - Long MKV encode run `quick-kelp` failed around `00:35:19` with partial file preserved.
