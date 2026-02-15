@@ -47,3 +47,17 @@ Build one final slideshow video from all photos in:
 - Final concat list: `C:\Users\tarus\Downloads\LoveBytesPhotos\_build_final_3x2_dci\concat.txt`
 - Encode target MKV: `C:\Users\tarus\Downloads\LoveBytesPhotos\LoveBytes_full_8k_3x2_ALL_1s_HDR_MAXBITRATE.mkv`
 - Remux target MP4: `C:\Users\tarus\Downloads\LoveBytesPhotos\LoveBytes_full_8k_3x2_ALL_1s_HDR_MAXBITRATE.mp4`
+
+## Additional Recovery Work (2026-02-15)
+
+- Long MKV encode run `quick-kelp` failed around `00:35:19` with partial file preserved.
+- Recovery strategy used:
+  1. Build a **tail concat** starting near failure second index (`start=2119` from 3090).
+  2. Encode tail segment to `LoveBytes_full_8k_3x2_ALL_1s_HDR_MAXBITRATE_tail.mkv`.
+  3. Stitch `partial + tail` into a combined MKV using concat demuxer and `-c copy`.
+- Tail concat path: `C:\Users\tarus\Downloads\LoveBytesPhotos\_build_resume_tail\concat_tail.txt`
+- Stitch list path: `C:\Users\tarus\Downloads\LoveBytesPhotos\_build_resume_tail\stitch_list.txt`
+- Combined output MKV path:
+  - `C:\Users\tarus\Downloads\LoveBytesPhotos\LoveBytes_full_8k_3x2_ALL_1s_HDR_MAXBITRATE_COMBINED.mkv`
+
+> Note: This resume method can create a tiny overlap or micro-gap around the cut point if the exact failure second is estimated. For strict frame-accurate joins, compute start index from the actual completed frame count/timebase.

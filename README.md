@@ -49,6 +49,7 @@ See `docs/COMMAND_LOG.md` for exact commands.
 - Some MJPEG decode warnings/errors are expected in giant mixed photo sets; pipeline is resilient and continues.
 - HEIC auxiliary streams can produce tiny/gray output when decoded incorrectly; use `pillow-heif` conversion path.
 - FFmpeg RAW decode can choose embedded tiny previews (`160x120` etc.); use `rawpy` for full-quality demosaic.
+- If long MKV encode crashes mid-run, use the documented **tail resume + MKV stitch** workflow in `docs/COMMAND_LOG.md` and `docs/TROUBLESHOOTING.md` to avoid starting over.
 
 ## GitHub Publish
 

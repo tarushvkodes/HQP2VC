@@ -82,3 +82,20 @@ ffmpeg -y -i input.mkv -c copy -movflags +faststart output.mp4
 ### Action
 - Ensure concat durations and output `-r` choices match intended cadence.
 - For fixed 1s holds, this can be acceptable depending on pipeline design.
+
+---
+
+## 7) Long MKV encode crashes mid-run
+
+### Symptom
+- FFmpeg exits non-zero after long progress; partial MKV exists.
+
+### Fast recovery (no full restart)
+1. Estimate completed seconds from failed run time (e.g., `00:35:19` -> `2119`).
+2. Build tail concat beginning at that index.
+3. Encode tail to a second MKV.
+4. Concatenate partial + tail with `-c copy` into a combined MKV.
+
+### Caveat
+- If start index is approximate, there may be minor overlap/gap at boundary.
+- For precision, derive split point from exact packet/frame timestamps.
