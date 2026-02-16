@@ -67,6 +67,24 @@ Implementation in progress script:
 - `scripts/09_build_chrono_pair_sequence.py`
 - Reuses existing rendered assets (`_raw_jpeg_pipeline_full`, `_heic_jpeg_pipeline_full`) to avoid full reconversion.
 
+## Chronological-Mated Render Outcomes (2026-02-15)
+
+- Rebuilt chronology/mating pipeline produced:
+  - `EVENTS=2904`
+  - `FRAMES=3081`
+  - `COUNTS={'heic_single': 163, 'pair': 354, 'raw_single': 1158, 'jpeg_single': 1406}`
+- Full render attempt to:
+  - `LoveBytes_full_8k_3x2_ALL_1s_HDR_MAXBITRATE_CHRONO_MATED.mkv`
+  failed around `00:34:05` (partial preserved).
+- Recovery for chronology-mated run:
+  1. Build tail from `start=2045` (of total `3081`).
+  2. Encode tail to `LoveBytes_full_8k_3x2_ALL_1s_HDR_MAXBITRATE_CHRONO_MATED_tail.mkv`.
+  3. Stitch partial + tail with concat demuxer (`-c copy`) to:
+     - `LoveBytes_full_8k_3x2_ALL_1s_HDR_MAXBITRATE_CHRONO_MATED_COMBINED.mkv`
+- Final stitched validation:
+  - `duration=3082.166000`
+  - `size=41272346321`
+
 ## Additional Recovery Work (2026-02-15)
 
 - Long MKV encode run `quick-kelp` failed around `00:35:19` with partial file preserved.

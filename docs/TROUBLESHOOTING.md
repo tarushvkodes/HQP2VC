@@ -101,7 +101,21 @@ ffmpeg -y -i input.mkv -c copy -movflags +faststart output.mp4
 
 ---
 
-## 8) Long MKV encode crashes mid-run
+## 8) `pwsh` not found on Windows host
+
+### Symptom
+- `pwsh : The term 'pwsh' is not recognized...`
+
+### Fix
+- Use Windows PowerShell explicitly:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\script.ps1 ...
+```
+
+---
+
+## 9) Long MKV encode crashes mid-run
 
 ### Symptom
 - FFmpeg exits non-zero after long progress; partial MKV exists.

@@ -53,6 +53,7 @@ See `docs/COMMAND_LOG.md` for exact commands.
 - HEIC auxiliary streams can produce tiny/gray output when decoded incorrectly; use `pillow-heif` conversion path.
 - FFmpeg RAW decode can choose embedded tiny previews (`160x120` etc.); use `rawpy` for full-quality demosaic.
 - If long MKV encode crashes mid-run, use the documented **tail resume + MKV stitch** workflow in `docs/COMMAND_LOG.md` and `docs/TROUBLESHOOTING.md` to avoid starting over.
+- Chronology-mated run note: full encode failed around `00:34:05` but recovered successfully via tail-encode + copy-stitch; final combined MKV validated at `duration=3082.166000`.
 
 ## GitHub Publish
 
