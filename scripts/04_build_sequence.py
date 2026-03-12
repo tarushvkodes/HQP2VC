@@ -32,12 +32,22 @@ def main():
 
     sequence = []
 
-    # Pair JPG then RAW-rendered JPEG where possible
+    # Pair JPG then RAW-rendered JPEG where possible.
+    # IMPORTANT: emit each JPEG immediately followed by its paired RAW
+    # so pairs stay adjacent (never batch all JPEGs then all RAWs).
     for k in sorted(jpg_map.keys()):
-        for j in sorted(jpg_map[k]):
-            sequence.append(str(j.resolve()))
-        if k in raw_rendered:
-            sequence.append(str(raw_rendered[k].resolve()))
+        jpegs = sorted(jpg_map[k])
+        raw = raw_rendered.get(k)
+        if raw and jpegs:
+            # First JPEG pairs with the RAW — emit them adjacent
+            sequence.append(str(jpegs[0].resolve()))
+            sequence.append(str(raw.resolve()))
+            # Remaining JPEGs for this stem (no RAW mate available)
+            for j in jpegs[1:]:
+                sequence.append(str(j.resolve()))
+        else:
+            for j in jpegs:
+                sequence.append(str(j.resolve()))
 
     # Append rendered RAWs that did not find JPG mate
     jpg_keys = set(jpg_map.keys())

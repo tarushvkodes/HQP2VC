@@ -191,19 +191,16 @@ def main():
                 ]
             })
 
-        for x in j_un:
+        # Interleave unpaired jpeg and raw singles by timestamp so they
+        # never cluster by type (avoids jpeg,jpeg,raw,raw runs).
+        all_singles = [(x, 'jpeg') for x in j_un] + [(x, 'raw') for x in r_un]
+        all_singles.sort(key=lambda s: (s[0]['dt'], str(s[0]['orig'])))
+        for x, role in all_singles:
             with Image.open(x['src']) as t:
                 t = ImageOps.exif_transpose(t)
                 rot = 90 if t.height > t.width else 0
-            events.append({'dt': x['dt'], 'kind': 'jpeg_single', 'key': k,
-                           'items': [{'role': 'jpeg', 'src': str(x['src']), 'orig': str(x['orig']), 'rot': rot}]})
-
-        for x in r_un:
-            with Image.open(x['src']) as t:
-                t = ImageOps.exif_transpose(t)
-                rot = 90 if t.height > t.width else 0
-            events.append({'dt': x['dt'], 'kind': 'raw_single', 'key': k,
-                           'items': [{'role': 'raw', 'src': str(x['src']), 'orig': str(x['orig']), 'rot': rot}]})
+            events.append({'dt': x['dt'], 'kind': f'{role}_single', 'key': k,
+                           'items': [{'role': role, 'src': str(x['src']), 'orig': str(x['orig']), 'rot': rot}]})
 
         for x in h:
             with Image.open(x['src']) as t:
@@ -212,7 +209,10 @@ def main():
             events.append({'dt': x['dt'], 'kind': 'heic_single', 'key': k,
                            'items': [{'role': 'heic', 'src': str(x['src']), 'orig': str(x['orig']), 'rot': rot}]})
 
-    events.sort(key=lambda e: (e['dt'], e['key'], e['kind']))
+    # Sort with explicit kind ordering: pairs first so their internal
+    # [jpeg, raw] block is never split by an adjacent single of the same role.
+    _KIND_ORDER = {'pair': 0, 'jpeg_single': 1, 'raw_single': 1, 'heic_single': 2}
+    events.sort(key=lambda e: (e['dt'], e['key'], _KIND_ORDER.get(e['kind'], 9)))
 
     sequence = []
     audit = []
@@ -242,6 +242,27 @@ def main():
     aud_out = Path(args.audit_out)
     aud_out.parent.mkdir(parents=True, exist_ok=True)
     aud_out.write_text(json.dumps({'rows': audit}, indent=2), encoding='utf-8')
+
+    # --- Validate pair adjacency: no jpeg should be immediately followed by
+    # another jpeg when both belong to pair events (same for raw). -----------
+    violations = []
+    for i in range(len(audit) - 1):
+        a, b = audit[i], audit[i + 1]
+        # Flag consecutive frames with the same role where at least one is
+        # part of a pair event (the hallmark of a broken pair).
+        if (a['role'] == b['role']
+                and a['role'] in ('jpeg', 'raw')
+                and ('pair' in a['event_kind'] or 'pair' in b['event_kind'])):
+            violations.append({
+                'index_a': a['index'], 'index_b': b['index'],
+                'role': a['role'],
+                'kind_a': a['event_kind'], 'kind_b': b['event_kind'],
+            })
+    if violations:
+        print(f"WARNING: {len(violations)} pair-adjacency violation(s) detected — "
+              "review audit output for details.")
+    else:
+        print("PAIR_ADJACENCY_CHECK=ok")
 
     print(f"EVENTS={len(events)} FRAMES={len(sequence)}")
 
