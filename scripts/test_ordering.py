@@ -14,6 +14,9 @@ from datetime import datetime, timedelta
 # the ordering logic without needing real image files on disk.
 # ---------------------------------------------------------------------------
 
+_KIND_ORDER = {'pair': 0, 'jpeg_single': 1, 'raw_single': 1, 'heic_single': 2}
+
+
 def pair_lists(jpegs, raws):
     """Mirror of 09_build_chrono_pair_sequence.pair_lists."""
     used = set()
@@ -104,13 +107,12 @@ def build_events_09_style(buckets):
                 'items': [{'role': 'heic', 'orig': x['orig']}],
             })
 
-    _KIND_ORDER = {'pair': 0, 'jpeg_single': 1, 'raw_single': 1, 'heic_single': 2}
     events.sort(key=lambda e: (e['dt'], e['key'], _KIND_ORDER.get(e['kind'], 9)))
 
     sequence = []
     for ev in events:
         for it in ev['items']:
-            sequence.append((it['role'], it['orig']))
+            sequence.append((it['role'], it['orig'], ev['kind']))
     return sequence
 
 
@@ -287,25 +289,10 @@ class TestEventSortOrder(unittest.TestCase):
             }
         }
         seq = build_events_09_style(buckets)
-        # Validate: no two consecutive frames with the same role where one
-        # belongs to a pair.
-        # Build pseudo-audit
-        audit = []
-        event_idx = 0
-        pair_count = 0
-        for i, (role, orig) in enumerate(seq):
-            # pair events produce 2 items; singles produce 1
-            if i == 0:
-                kind = 'pair'
-                pair_count = 1
-            elif pair_count == 1:
-                kind = 'pair'
-                pair_count = 0
-                event_idx += 1
-            else:
-                kind = f'{role}_single'
-                event_idx += 1
-            audit.append({'role': role, 'event_kind': kind, 'index': i})
+        # build_events_09_style now returns (role, orig, event_kind) tuples;
+        # use event_kind directly instead of inferring it from position.
+        audit = [{'role': role, 'event_kind': kind, 'index': i}
+                 for i, (role, _orig, kind) in enumerate(seq)]
 
         violations = []
         for i in range(len(audit) - 1):
@@ -321,15 +308,12 @@ class TestKindOrderGuarantee(unittest.TestCase):
     """Verify that the _KIND_ORDER mapping produces the intended sort."""
 
     def test_pair_sorts_before_jpeg_single(self):
-        _KIND_ORDER = {'pair': 0, 'jpeg_single': 1, 'raw_single': 1, 'heic_single': 2}
         self.assertLess(_KIND_ORDER['pair'], _KIND_ORDER['jpeg_single'])
 
     def test_pair_sorts_before_raw_single(self):
-        _KIND_ORDER = {'pair': 0, 'jpeg_single': 1, 'raw_single': 1, 'heic_single': 2}
         self.assertLess(_KIND_ORDER['pair'], _KIND_ORDER['raw_single'])
 
     def test_jpeg_and_raw_singles_same_priority(self):
-        _KIND_ORDER = {'pair': 0, 'jpeg_single': 1, 'raw_single': 1, 'heic_single': 2}
         self.assertEqual(_KIND_ORDER['jpeg_single'], _KIND_ORDER['raw_single'])
 
 
